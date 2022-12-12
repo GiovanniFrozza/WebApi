@@ -33,3 +33,5 @@ C:\Users\giova\Desktop\cursowebapi\APICatalogo\APICatalogo\obj\Debug\net6.0\APIC
 C:\Users\giova\Desktop\cursowebapi\APICatalogo\APICatalogo\obj\Debug\net6.0\APICatalogo.genruntimeconfig.cache
 C:\Users\giova\Desktop\cursowebapi\APICatalogo\APICatalogo\obj\Debug\net6.0\ref\APICatalogo.dll
 C:\Users\giova\Desktop\cursowebapi\APICatalogo\APICatalogo\bin\Debug\net6.0\Newtonsoft.Json.dll
+C:\Users\giova\Desktop\cursowebapi\APICatalogo\APICatalogo\bin\Debug\net6.0\AutoMapper.dll
+C:\Users\giova\Desktop\cursowebapi\APICatalogo\APICatalogo\bin\Debug\net6.0\AutoMapper.Extensions.Microsoft.DependencyInjection.dll

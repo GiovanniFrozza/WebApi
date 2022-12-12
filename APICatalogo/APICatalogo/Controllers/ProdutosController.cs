@@ -1,11 +1,15 @@
 ﻿using APICatalogo.Context;
+using APICatalogo.DTOs;
 using APICatalogo.Filters;
 using APICatalogo.Models;
+using APICatalogo.Pagination;
 using APICatalogo.Repository;
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Server.IIS.Core;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using System.Reflection.Metadata.Ecma335;
 
 namespace APICatalogo.Controllers
@@ -15,70 +19,150 @@ namespace APICatalogo.Controllers
     public class ProdutosController : ControllerBase
     {
         private readonly IUnitOfWork _uof;
+        private readonly IMapper _mapper;
 
-        public ProdutosController(IUnitOfWork context)
+        public ProdutosController(IUnitOfWork context, IMapper mapper)
         {
             _uof = context;
+            _mapper = mapper;
         }
 
         [HttpGet]
         [ServiceFilter(typeof(ApiLoggingFilter))]
-        public ActionResult<IEnumerable<Produto>> Get()
+        public ActionResult<IEnumerable<ProdutoDTO>> Get([FromQuery] ProdutosParameters produtosParameters)
         {
-            return _uof.ProdutoRepository.Get().ToList();
+            try
+            {
+                var produtos = _uof.ProdutoRepository.GetProdutos(produtosParameters);
+
+                var metadata = new
+                {
+                    produtos.TotalCount,
+                    produtos.PageSize,
+                    produtos.CurrentPage,
+                    produtos.TotalPages,
+                    produtos.HasNext,
+                    produtos.HasPrevious
+                };
+
+                Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
+
+                var produtosDTO = _mapper.Map<List<ProdutoDTO>>(produtos);
+                return produtosDTO;
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                            "Ocorreu um problema ao tratar a sua solicitação.");
+            }
         }
 
         [HttpGet("{id:int:min(1)}", Name="ObterProduto")] 
-        public ActionResult<Produto> Get(int id)
+        public ActionResult<ProdutoDTO> Get(int id)
         {
-            var produto = _uof.ProdutoRepository.GetById(p => p.ProdutoId == id);
+            try
+            {
+                var produto = _uof.ProdutoRepository.GetById(p => p.ProdutoId == id);
 
-            if (produto is null)
-                throw new Exception("Produtos não encontrados.");
+                if (produto is null)
+                    throw new Exception("Produtos não encontrados.");
 
-            return produto;
+                var produtoDTO = _mapper.Map<ProdutoDTO>(produto);
+
+                return produtoDTO;
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                            "Ocorreu um problema ao tratar a sua solicitação.");
+            }
         }
 
         [HttpPost]
-        public ActionResult Post(Produto produto)
+        public ActionResult Post(ProdutoDTO produtoDto)
         {
-            _uof.ProdutoRepository.Add(produto);
-            _uof.Commit();
+            try
+            {
+                if (produtoDto is null)
+                    return BadRequest("Produto informado com erro.");
 
-            return new CreatedAtRouteResult("ObterProduto", 
-                new { id = produto.ProdutoId }, produto);
+                var produto = _mapper.Map<Produto>(produtoDto);
+
+                _uof.ProdutoRepository.Add(produto);
+                _uof.Commit();
+
+                var produtoDTO = _mapper.Map<ProdutoDTO>(produto);
+
+                return new CreatedAtRouteResult("ObterProduto",
+                    new { id = produto.ProdutoId }, produtoDTO);
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "Ocorreu um problema ao tratar a sua solicitação.");
+            }
         }
 
         [HttpPut("{id:int:min(1)}")]
-        public ActionResult Put(int id, Produto produto)
+        public ActionResult Put(int id, ProdutoDTO produtoDto)
         {
-            if(id != produto.ProdutoId)
-                return BadRequest();
+            try
+            {
+                if (id != produtoDto.ProdutoId)
+                    return BadRequest();
 
-            _uof.ProdutoRepository.Update(produto);
-            _uof.Commit();
+                var produto = _mapper.Map<Produto>(produtoDto);
 
-            return Ok(produto);
+                _uof.ProdutoRepository.Update(produto);
+                _uof.Commit();
+
+                return Ok(produto);
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                            "Ocorreu um problema ao tratar a sua solicitação.");
+            }
         }
 
         [HttpDelete("{id:int}")]
-        public ActionResult Delete(int id)
+        public ActionResult<ProdutoDTO> Delete(int id)
         {
-            var produto = _uof.ProdutoRepository.GetById(p => p.ProdutoId == id);
+            try
+            {
+                var produto = _uof.ProdutoRepository.GetById(p => p.ProdutoId == id);
 
-            if (produto is null)
-                throw new Exception("Produto não localizado.");
+                if (produto is null)
+                    throw new Exception("Produto não localizado.");
 
-            _uof.ProdutoRepository.Delete(produto);
-            _uof.Commit();
+                _uof.ProdutoRepository.Delete(produto);
+                _uof.Commit();
 
-            return Ok(produto);
+                var produtoDTO = _mapper.Map<ProdutoDTO>(produto);
+
+                return Ok(produtoDTO);
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                            "Ocorreu um problema ao tratar a sua solicitação.");
+            }
         }
 
         [HttpGet("menorPreco")]
-        public ActionResult<IEnumerable<Produto>> GetProdutoPrecos()
+        public ActionResult<IEnumerable<ProdutoDTO>> GetProdutoPrecos()
         {
-            return _uof.ProdutoRepository.GetProdutosPorPreco().ToList();
+            try
+            {
+                var produtos = _uof.ProdutoRepository.GetProdutosPorPreco().ToList();
+                var produtosDTO = _mapper.Map<List<ProdutoDTO>>(produtos);
+                return produtosDTO;
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                            "Ocorreu um problema ao tratar a sua solicitação.");
+            }
         }
     }
 }
