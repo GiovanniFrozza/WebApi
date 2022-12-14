@@ -12,7 +12,7 @@ public class Produto : IValidatableObject
     public int ProdutoId { get; set; }
 
     [Required(ErrorMessage = "O nome é obrigatório")]
-    [StringLength(80, ErrorMessage = "O nome deve ter entre {1} e {2} caracteres", MinimumLength = 5)]
+    [StringLength(80, ErrorMessage = "O nome deve ter entre {2} e {1} caracteres", MinimumLength = 5)]
     [PrimeiraLetraMaiuscula]
     public string? Nome { get; set; }
 
@@ -21,7 +21,9 @@ public class Produto : IValidatableObject
     public string? Descricao { get; set; }
 
     [Required]
+    [DataType(DataType.Currency)]
     [Range(1, 10000, ErrorMessage = "O preço deve estar entre {1} e {2}")]
+    [Column(TypeName = "decimal(8,2)")]
     public decimal Preco { get; set; }
 
     [Required]
