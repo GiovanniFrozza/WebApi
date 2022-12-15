@@ -4,6 +4,7 @@ using APICatalogo.Models;
 using APICatalogo.Pagination;
 using APICatalogo.Repository;
 using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
@@ -13,7 +14,7 @@ using Newtonsoft.Json;
 
 namespace APICatalogo.Controllers
 {
-    [Authorize(AuthenticationSchemes = "Bearer")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [EnableCors("PermitirApiRequest")]
     [Route("api/[controller]")]
     [ApiController]
@@ -26,6 +27,13 @@ namespace APICatalogo.Controllers
         {
             _uof = context;
             _mapper = mapper;
+        }
+
+        [AllowAnonymous]
+        [HttpGet("teste")]
+        public string GetTeste()
+        {
+            return $"CategoriasController - {DateTime.Now.ToLongDateString().ToString() }";
         }
 
         [HttpGet("produtos")]

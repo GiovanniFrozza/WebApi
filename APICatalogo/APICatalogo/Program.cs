@@ -16,7 +16,7 @@ using System.Text.Json.Serialization;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddCors(options => options.AddPolicy("PermitirApiRequest",
-    builder => builder.AllowAnyOrigin()));
+    builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod().Build()));
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -105,5 +105,5 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-app.UseCors(opt => opt.AllowAnyOrigin());
+app.UseCors("EnableCORS");
 app.Run();
