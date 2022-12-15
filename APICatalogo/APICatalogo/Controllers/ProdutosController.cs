@@ -5,6 +5,8 @@ using APICatalogo.Models;
 using APICatalogo.Pagination;
 using APICatalogo.Repository;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Server.IIS.Core;
@@ -14,6 +16,8 @@ using System.Reflection.Metadata.Ecma335;
 
 namespace APICatalogo.Controllers
 {
+    [Authorize(AuthenticationSchemes = "Bearer")]
+    [EnableCors("PermitirApiRequest")]
     [Route("[controller]")]
     [ApiController]
     public class ProdutosController : ControllerBase
